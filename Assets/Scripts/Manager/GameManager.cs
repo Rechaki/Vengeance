@@ -9,6 +9,7 @@ public class GameManager : Singleton<GameManager>
 	public int killedEnemyNum = 20;
 	public int KilledEnemyNumToBoss = 30;
 	public int stage = 0;
+	public Transform[] bossMovePoints;
 
 	public bool isGameOver { get; private set; }
 	public bool Paused { get; private set; }
@@ -26,6 +27,7 @@ public class GameManager : Singleton<GameManager>
 	Player _playerRoot;
 	Vector2 _maxPos;
 	bool _inited = false;
+	bool _isBossCreated = false;
 	float _createSlimeTimer = 0;
 	float _createArcherTimer = 0;
 	int _killedNum = 0;
@@ -70,7 +72,11 @@ public class GameManager : Singleton<GameManager>
 				CreateArcher();
 				break;
             case CreateEnemyState.Boss:
-				GlobalMessenger.Launch(EventMsg.BossComing);
+				if (!_isBossCreated)
+				{
+					GlobalMessenger.Launch(EventMsg.BossComing);
+					_isBossCreated = true;
+				}
 				break;
             default:
                 break;
@@ -92,6 +98,7 @@ public class GameManager : Singleton<GameManager>
 		_createSlimeTimer = 0;
 		_createArcherTimer = 0;
 		_killedNum = 0;
+		_isBossCreated = false;
 		_inited = true;
 		_createState = CreateEnemyState.None;
 
@@ -141,11 +148,6 @@ public class GameManager : Singleton<GameManager>
 		var enemyPefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_PREFAB + _enemyBoosIDs[stage]);
 		var enemyObject = ObjectPool.I.Create(enemyPefab);
 		enemyObject.transform.position = Vector3.zero;
-		GameObject target = new GameObject("Boss Target");
-		var x = UnityEngine.Random.Range(-_maxPos.x, _maxPos.x);
-		var y = UnityEngine.Random.Range(-_maxPos.y, _maxPos.y);
-		target.transform.position = new Vector3(x, y, 0);
-		enemyObject.GetComponent<EnemyUnit>().target = target.transform;
 		enemyObject.GetComponent<EnemyUnit>().InitData();
 		enemyObject.SetActive(true);
 	}

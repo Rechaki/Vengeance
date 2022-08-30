@@ -31,21 +31,20 @@ public class EnemySnake : EnemyUnit
 
     GameObject _hpBarObject;
     GameObject _bulletPrefab;
-    Vector3 _targetPos;
     Vector2 _direction;
     Vector3[] _segmentPoses;
     Vector3[] _segmentVelocity;
     bool _hitted;
-    float _radius;
+    int _movePointIndex;
     float _atkCD;
     float _stopTimer;
 
     public override void InitData()
     {
         base.InitData();
-        _atkCD = Data.Skill.cd;
-        _radius = Data.NowViewRadius;
-        _targetPos = target.position;
+        _movePointIndex = 0;
+        _atkCD = 0;
+        target = GameManager.I.bossMovePoints[_movePointIndex];
         _bulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_SNAKE_BULLET);
         if (_debug)
         {
@@ -149,17 +148,17 @@ public class EnemySnake : EnemyUnit
     void Move()
     {
         //head
-        _direction = _targetPos - _head.position;
+        _direction = target.position - _head.position;
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         _head.rotation = Quaternion.Slerp(_head.rotation, rotation, Data.NowTurnSpeed * Time.deltaTime);
-        _head.position = Vector2.MoveTowards(_head.position, _targetPos, Data.NowMoveSpeed * Time.deltaTime);
+        _head.position = Vector2.MoveTowards(_head.position, target.position, Data.NowMoveSpeed * Time.deltaTime);
         var zone = Physics2D.OverlapCircleAll(transform.position, Data.NowViewRadius);
         foreach (var item in zone)
         {
             if (item.tag == "Player")
             {
-                _targetPos = item.transform.position;
+                //target.position = item.transform.position;
                 break;
             }
         }
@@ -173,9 +172,22 @@ public class EnemySnake : EnemyUnit
             _bodyParts[i - 1].transform.position = _segmentPoses[i];
         }
 
-        if ((_targetPos - transform.position).magnitude < Data.NowViewRadius)
+        if ((target.position - _head.position).magnitude < 0.1f)
         {
-            CurrentState = StateMachine.Attack;
+            //if (_atkCD > Data.Skill.cd)
+            //{
+                CurrentState = StateMachine.Attack;
+                _atkCD = 0;
+            //}
+            if (_movePointIndex < GameManager.I.bossMovePoints.Length - 1)
+            {
+                _movePointIndex++;
+            }
+            else
+            {
+                _movePointIndex = 0;
+            }
+            target = GameManager.I.bossMovePoints[_movePointIndex];
         }
 
     }
@@ -187,12 +199,14 @@ public class EnemySnake : EnemyUnit
         Bullet bullet = bulletObject.GetComponent<Bullet>();
         bullet.owner = Data;
         bullet.skillData = Data.Skill;
-        bullet.moveDirection = (_targetPos - transform.position).normalized;
+        bullet.moveDirection = (target.position - _head.position).normalized;
+        float angle = Mathf.Atan2((target.position - _head.position).y, (target.position - _head.position).x) * Mathf.Rad2Deg;
+        bullet.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         bullet.speed = Data.NowAtkSpeed;
         bullet.gameObject.SetActive(true);
-        var x = UnityEngine.Random.Range(-GameManager.I.ScreenSize.x, GameManager.I.ScreenSize.x);
-        var y = UnityEngine.Random.Range(-GameManager.I.ScreenSize.y, GameManager.I.ScreenSize.y);
-        target.transform.position = new Vector3(x, y, 0);
+        //var x = UnityEngine.Random.Range(-GameManager.I.ScreenSize.x, GameManager.I.ScreenSize.x);
+        //var y = UnityEngine.Random.Range(-GameManager.I.ScreenSize.y, GameManager.I.ScreenSize.y);
+        //target.position = new Vector3(x, y, 0);
         CurrentState = StateMachine.Move;
     }
 

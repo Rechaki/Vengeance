@@ -22,12 +22,13 @@ public class TipsPanel : UIPanel
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
         if (stateInfo.fullPathHash == Animator.StringToHash("Base Layer.BossIconOut") && _animator.IsInTransition(0))
         {
-            GlobalMessenger.Launch(EventMsg.BossBattleStart);
+            //GlobalMessenger.Launch(EventMsg.BossBattleStart);
         }
     }
 
     void PlayBossIn()
     {
         _animator.SetTrigger("BossIn");
+        GlobalMessenger.Launch(EventMsg.BossBattleStart);
     }
 }
