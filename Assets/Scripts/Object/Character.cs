@@ -86,7 +86,9 @@ public class Character : MonoBehaviour
     }
 
     void OnDestroy() {
+        _characterData.RefreshEvent -= Refresh;
         InputManager.I.LeftStcikEvent -= Move;
+        InputManager.I.RightBtnWEvent -= Attack;
         _damageColliderEvents.OnTriggerEnterEvent -= OnDamageTriggerEnter;
     }
 
@@ -97,6 +99,12 @@ public class Character : MonoBehaviour
 #endif
 
     void Refresh(CharacterData data) {
+        if (data.NowHP <= 0)
+        {
+            GlobalMessenger.Launch(EventMsg.GameOver);
+            //Destroy(gameObject);
+            return;
+        }
         _movement.moveSpeed = data.NowMoveSpeed;
         _hpBarObject.GetComponent<HPBar>().SetValue((float)data.NowHP / (float)data.MaxHP);
     }
@@ -145,6 +153,10 @@ public class Character : MonoBehaviour
     }
 
     void OnDamageTriggerEnter(Collider2D collider) {
+        if (collider.tag == "Enemy")
+        {
+            //_characterData.OnHit(collider.transform.GetComponent<EnemyUnit>());
+        }
         if (collider.tag == "EnemyWeapon")
         {
             _characterData.OnHit(collider.transform.GetComponent<Weapon>().damage);
@@ -152,7 +164,6 @@ public class Character : MonoBehaviour
         if (collider.tag == "EnemyBullet")
         {
             OnHit(collider.transform.GetComponent<Bullet>().owner, collider.transform.GetComponent<Bullet>().skillData);
-
         }
     }
 

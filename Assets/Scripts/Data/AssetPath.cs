@@ -8,7 +8,8 @@
 
     public const string ENEMY_SLIME_BULLET = "Prefab/Objects/SlimeBullet";
     public const string ENEMY_ARCHER_BULLET = "Prefab/Objects/ArcherBullet";
-    public const string ENEMY_SNAKE_BULLET = "Prefab/Objects/SnakeBullet"; 
+    public const string ENEMY_SNAKE_BULLET = "Prefab/Objects/SnakeBullet";
+    public const string ENEMY_SNAKE_BODY_BULLET = "Prefab/Objects/SnakeBodyBullet";
     public const string CHARACTER_BULLET = "Prefab/Objects/Bullet";
 
     public const string PLAYER_BULLET = "Prefab/Objects/PlayerBullet";

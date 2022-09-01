@@ -6,7 +6,7 @@ public class GameManager : Singleton<GameManager>
 	public float maxSizeOffset = 2f;
 	public float createSlimeSpeed = 5f;
 	public float createArcherSpeed = 8f;
-	public int killedEnemyNum = 20;
+	public int killedEnemyNumToNextEnemy = 20;
 	public int KilledEnemyNumToBoss = 30;
 	public int stage = 0;
 	public Transform[] bossMovePoints;
@@ -51,7 +51,7 @@ public class GameManager : Singleton<GameManager>
 
     void Update()
 	{
-		if (_killedNum > killedEnemyNum)
+		if (_killedNum > killedEnemyNumToNextEnemy)
 		{
 			_createState = CreateEnemyState.Archer;
         }
@@ -102,7 +102,7 @@ public class GameManager : Singleton<GameManager>
 		_inited = true;
 		_createState = CreateEnemyState.None;
 
-		DontDestroyOnLoad(this);
+		//DontDestroyOnLoad(this);
 	}
 
 	public Player GetPlayerRoot() {

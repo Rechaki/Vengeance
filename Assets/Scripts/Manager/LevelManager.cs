@@ -11,14 +11,9 @@ public class LevelManager : Singleton<LevelManager>
     }
 
     public void LoadScene(string levelName) {
-        if (levelName == "Clear")
-        {
-            GlobalMessenger.Launch(EventMsg.GameClear);
-            return;
-        }
+        ObjectPool.I.ClearCachePool();
         CurrentLevel = levelName;
         SceneManager.LoadScene(levelName, LoadSceneMode.Single);
-        //EventMsgManager.Check();
 
     }
 }

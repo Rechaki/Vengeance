@@ -48,7 +48,6 @@ public class InputManager : Singleton<InputManager>
     float _rightBtnS = 0;
     float _rightBtnW = 0;
     float _rightBtnN = 0;
-    float _rightTriggerValue = 0;
 
     void Start() {
         Init();
@@ -67,8 +66,6 @@ public class InputManager : Singleton<InputManager>
                 Debug.LogError("Trying to set device but is not recognized by Unity InputSystem!");
                 break;
         }
-
-        if (DataManager.I.GameOver) return;
 
         LeftStcikEvent?.Invoke(_leftStcikValue, CurrentActionState);
         RightStcikEvent?.Invoke(_rightStcikValue, CurrentActionState);
@@ -89,8 +86,6 @@ public class InputManager : Singleton<InputManager>
 
         GlobalMessenger.AddListener(EventMsg.SwitchToUI, () => { CurrentActionState = ActionState.UI; });
         GlobalMessenger.AddListener(EventMsg.SwitchToGameIn, () => { CurrentActionState = ActionState.Game; });
-
-        DontDestroyOnLoad(this);
     }
 
     void RefreshInputType() {
@@ -138,11 +133,10 @@ public class InputManager : Singleton<InputManager>
         }
         _leftStcikValue = inputValue;
         _rightStcikValue = Mouse.position.ReadValue();
-        _rightBtnE = (Keyboard.cKey.isPressed || Keyboard.lKey.isPressed) ? 1 : 0;
-        _rightBtnS = (Keyboard.xKey.isPressed || Keyboard.kKey.isPressed) ? 1 : 0;
-        _rightBtnW = (Keyboard.zKey.isPressed || Keyboard.jKey.isPressed) ? 1 : 0;
-        _rightBtnN = (Keyboard.sKey.isPressed || Keyboard.iKey.isPressed) ? 1 : 0;
-        _rightTriggerValue = Mouse.leftButton.isPressed ? 1 : 0;
+        _rightBtnE = (Keyboard.cKey.isPressed && Keyboard.cKey.wasPressedThisFrame || Keyboard.lKey.isPressed && Keyboard.lKey.wasPressedThisFrame) ? 1 : 0;
+        _rightBtnS = (Keyboard.xKey.isPressed && Keyboard.xKey.wasPressedThisFrame || Keyboard.kKey.isPressed && Keyboard.kKey.wasPressedThisFrame) ? 1 : 0;
+        _rightBtnW = (Keyboard.zKey.isPressed && Keyboard.zKey.wasPressedThisFrame || Keyboard.jKey.isPressed && Keyboard.jKey.wasPressedThisFrame) ? 1 : 0;
+        _rightBtnN = (Keyboard.sKey.isPressed && Keyboard.sKey.wasPressedThisFrame || Keyboard.iKey.isPressed && Keyboard.iKey.wasPressedThisFrame) ? 1 : 0;
     }
 
     void GamepadInput() {
@@ -152,7 +146,6 @@ public class InputManager : Singleton<InputManager>
         _rightBtnS = Gamepad.buttonSouth.ReadValue();
         _rightBtnW = Gamepad.buttonWest.ReadValue();
         _rightBtnN = Gamepad.buttonNorth.ReadValue();
-        _rightTriggerValue = Gamepad.rightTrigger.ReadValue();
     }
 
 }

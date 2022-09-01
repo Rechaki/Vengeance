@@ -1736,7 +1736,10 @@ MonoBehaviour:
   _targetDirection: {fileID: 4351582841939967731}
   _wiggleDirection: {fileID: 4351582842782742359}
   _firePoint: {fileID: 9003977180778152021}
-  _hittedStopTime: 0.5
+  _bulletNum: 3
+  _followPlayerTime: 5
+  _offsetAngle: 15
+  _hittedStopTime: 0.1
   _hpPositionY: 0.6
   _targetDistance: 0.6
   _smoothSpeed: 0.1

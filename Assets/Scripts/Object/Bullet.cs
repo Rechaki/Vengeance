@@ -7,34 +7,33 @@ public class Bullet : MonoBehaviour
     public UnitData owner;
     public SkillData skillData;
     public Vector3 moveDirection;
-
-
+    public Vector3 target;
     public float speed;
     public int damage;
-    public Vector3 target;
 
-    void Start()
-    {
+    float _lifeTime = 0.5f;
+    float _timer;
 
-
+    void OnEnable() {
+        _timer = 0;    
     }
 
     void Update()
     {
         if (gameObject.activeSelf)
         {
+            if (moveDirection == Vector3.zero)
+            {
+                _timer += Time.deltaTime;
+                if (_timer > _lifeTime)
+                {
+                    _timer = 0;
+                    ObjectPool.I.Recycle(gameObject);
+                }
+            }
             transform.position += moveDirection * speed * Time.deltaTime;
         }
     }
-
-    //void OnCollisionEnter2D(Collision2D collision) {
-    //    //Debug.Log(collision.transform.name);
-    //    if (collision.transform.tag != "Enemy" || collision.transform.tag != "EnemyBullet")
-    //    {
-    //        ObjectPool.I.Recycle(gameObject);
-    //    }
-
-    //}
 
     void OnTriggerEnter2D(Collider2D collision) {
         if (gameObject.tag == "Bullet")
@@ -51,6 +50,10 @@ public class Bullet : MonoBehaviour
                 ObjectPool.I.Recycle(gameObject);
             }
         }
+    }
+
+    void Recycle() {
+        ObjectPool.I.Recycle(gameObject);
     }
 
 }

@@ -7,6 +7,21 @@ public class HPBar : MonoBehaviour
     [SerializeField]
     Transform _pivot;
 
+    void OnEnable() {
+        //GlobalMessenger.AddListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
+        //GlobalMessenger.AddListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
+    }
+
+    void OnDisable() {
+        //GlobalMessenger.RemoveListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
+        //GlobalMessenger.RemoveListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
+    }
+
+    void OnDestroy() {
+        //GlobalMessenger.RemoveListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
+        //GlobalMessenger.RemoveListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
+    }
+
     public void SetValue(float num)
     {
         if (num <= 0)

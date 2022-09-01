@@ -15,6 +15,8 @@ public enum StateMachine
 {
     Idle,
     Move,
+    FollowPlayer,
+    RotateToPlayer,
     Attack,
     Dead,
 }

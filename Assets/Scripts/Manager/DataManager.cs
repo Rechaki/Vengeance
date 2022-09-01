@@ -12,12 +12,18 @@ public class DataManager : Singleton<DataManager>
     Dictionary<string, SkillData> _skillDic = new Dictionary<string, SkillData>();
     Dictionary<string, BuffData> _buffDic = new Dictionary<string, BuffData>();
     GameStateData _stateData;
+    bool _inited = false;
 
     public void Init() {
-        Load();
+        if (!_inited)
+        {
+            Load();
 
-        GameStateInit();
-        PlayerDataInit();
+            GameStateInit();
+            PlayerDataInit();
+
+            _inited = true;
+        }
     }
 
     public void Load() {

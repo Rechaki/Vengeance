@@ -32,6 +32,7 @@ public class ChoosePanel : UIPanel
     protected override void Hide() {
         _startBtn.onClick.RemoveListener(OnStartClick);
         InputManager.I.LeftStcikEvent -= OnSelect;
+        InputManager.I.RightBtnEEvent -= OnStartGame;
         GlobalMessenger.Launch(EventMsg.SwitchToGameIn);
     }
 
