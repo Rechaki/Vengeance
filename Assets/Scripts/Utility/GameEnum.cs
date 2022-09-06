@@ -13,6 +13,7 @@ public enum EnemyType
 
 public enum StateMachine
 {
+    Create,
     Idle,
     Move,
     FollowPlayer,

@@ -33,6 +33,8 @@ public class EnemySnake : EnemyUnit
     [SerializeField]
     SnakeBody[] _bodyParts;
     [SerializeField]
+    SpriteRenderer[] _snakeSpriteRenderers;
+    [SerializeField]
     bool _debug = false;
 
     GameObject _hpBarObject;
@@ -43,11 +45,12 @@ public class EnemySnake : EnemyUnit
     Vector3[] _segmentPoses;
     Vector3[] _segmentVelocity;
     bool _hitted;
-    bool _isStarted;
     int _movePointIndex;
     int _bodyPartIndex;
+    int _moveNum;
     float _atkCD;
     float _stopTimer;
+    float _followTimer;
 
     public override void InitData()
     {
@@ -55,7 +58,8 @@ public class EnemySnake : EnemyUnit
         _movePointIndex = 0;
         _bodyPartIndex = 0;
         _atkCD = 0;
-        _isStarted = true;
+        _stopTimer = 0;
+        _followTimer = 0;
         target = GameManager.I.bossMovePoints[_movePointIndex];
         _bulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_SNAKE_BULLET);
         _bodyBulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_SNAKE_BODY_BULLET);
@@ -67,7 +71,7 @@ public class EnemySnake : EnemyUnit
             _hpBarObject.SetActive(true);
         }
 
-        CurrentState = StateMachine.Move;
+        CurrentState = StateMachine.Create;
         _segmentPoses = new Vector3[_bodyParts.Length + 1];
         _segmentVelocity = new Vector3[_bodyParts.Length + 1];
         Data.RefreshEvent += Refresh;
@@ -82,77 +86,28 @@ public class EnemySnake : EnemyUnit
     {
         if (_hitted)
         {
-            _stopTimer += Time.deltaTime;
-            if (_stopTimer > _hittedStopTime)
-            {
-                _stopTimer = 0;
-                _hitted = false;
-            }
+            OnHitEffect();
         }
-        else
+
+        switch (CurrentState)
         {
-            switch (CurrentState)
-            {
-                case StateMachine.Idle:
-                    break;
-                case StateMachine.Move:
-                    if ((target.position - _head.position).magnitude < 0.1f)
-                    {
-                        if (_movePointIndex < GameManager.I.bossMovePoints.Length - 1)
-                        {
-                            _isStarted = false;
-                            _movePointIndex++;
-                            target = GameManager.I.bossMovePoints[_movePointIndex];
-                        }
-                        else
-                        {
-                            _movePointIndex = 0;
-                            CurrentState = StateMachine.FollowPlayer;
-                        }
-                    }
-                    Move(target.position);
-                    break;
-                case StateMachine.FollowPlayer:
-                    Move(_player.transform.position);
-                    Attack();
-                    _followPlayerTime -= Time.deltaTime;
-                    if (_followPlayerTime <= 0)
-                    {
-                        _followPlayerTime = 3f;
-                        CurrentState = StateMachine.Move;
-                    }
-                    break;
-                case StateMachine.Attack:
-                    Attack();
-                    break;
-                case StateMachine.Dead:
-                    _stopTimer += Time.deltaTime;
-                    if (_stopTimer > _hittedStopTime)
-                    {
-                        if (_bodyPartIndex < _bodyParts.Length)
-                        {
-                            var prefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_DEAD_VFX);
-                            var vfxObject = ObjectPool.I.Create(prefab);
-                            vfxObject.transform.position = _bodyParts[_bodyPartIndex].transform.position;
-                            vfxObject.gameObject.SetActive(true);
-                            _bodyParts[_bodyPartIndex].gameObject.SetActive(false);
-                            _bodyPartIndex++;
-                        }
-                        else
-                        {
-                            GlobalMessenger.Launch(EventMsg.KilledTheEnemy);
-                            target = null;
-                            ObjectPool.I.Recycle(gameObject);
-                            ObjectPool.I.Recycle(_hpBarObject);
-                            GlobalMessenger.Launch(EventMsg.GameClear);
-                        }
-                        _stopTimer = 0;
-                    }
-                   
-                    break;
-                default:
-                    break;
-            }
+            case StateMachine.Create:
+                Create();
+                break;
+            case StateMachine.Move:
+                Move();
+                break;
+            case StateMachine.FollowPlayer:
+                Follow();
+                break;
+            case StateMachine.Attack:
+                Attack();
+                break;
+            case StateMachine.Dead:
+                Dead();
+                break;
+            default:
+                break;
         }
 
         if (_debug)
@@ -182,27 +137,114 @@ public class EnemySnake : EnemyUnit
 
     void OnDamageTriggerEnter(Collider2D collider)
     {
+        if (CurrentState == StateMachine.Create)
+        {
+            return;
+        }
         if (collider.tag == "Weapon")
         {
-            if (_isStarted)
-                return;
-
             OnHit(collider.GetComponent<Weapon>().damage);
             _hitted = true;
         }
         else if (collider.tag == "Bullet")
         {
-            if (_isStarted)
-                return;
-
             OnHit(collider.transform.GetComponent<Bullet>().owner, collider.transform.GetComponent<Bullet>().skillData);
             _hitted = true;
         }
     }
 
+    protected override void OnDead() {
 
+    }
 
-    void Move(Vector3 nextPos)
+    void OnHitEffect() {
+        _stopTimer += Time.deltaTime;
+        foreach (var sprite in _snakeSpriteRenderers)
+        {
+            sprite.color = Color.black;
+        }
+        if (_stopTimer > _hittedStopTime)
+        {
+            foreach (var sprite in _snakeSpriteRenderers)
+            {
+                sprite.color = Color.white;
+            }
+            _stopTimer = 0;
+            _hitted = false;
+        }
+    }
+
+    void Create() {
+        if ((target.position - _head.position).magnitude < 0.1f)
+        {
+            _movePointIndex++;
+            target = GameManager.I.bossMovePoints[_movePointIndex];
+            _moveNum = 0;
+            CurrentState = StateMachine.Move;
+        }
+        else
+        {
+            MoveToPos(target.position);
+        }
+
+    }
+
+    void Move() {
+        if (_moveNum < 4)
+        {
+            if ((target.position - _head.position).magnitude < 0.1f)
+            {
+                if (_movePointIndex < GameManager.I.bossMovePoints.Length - 1)
+                {
+                    _movePointIndex++;
+                    target = GameManager.I.bossMovePoints[_movePointIndex];
+                }
+                else
+                {
+                    _movePointIndex = 0;
+                    target = GameManager.I.bossMovePoints[_movePointIndex];
+                }
+                _moveNum++;
+            }
+            MoveToPos(target.position);
+        }
+        else
+        {
+            CurrentState = StateMachine.FollowPlayer;
+        }
+        
+    }
+
+    void Follow() {
+        MoveToPos(_player.transform.position);
+        Attack();
+        _followTimer += Time.deltaTime;
+        if (_followTimer > _followPlayerTime)
+        {
+            _followTimer = 0f;
+            float min = 0f;
+            int index = 0;
+            for (int i = 0; i < GameManager.I.bossMovePoints.Length; i++)
+            {
+                Vector3 distance = GameManager.I.bossMovePoints[i].position - _head.transform.position;
+                var dot = Vector3.Dot(_head.right, distance);
+                if (dot > 0)
+                {
+                    if (min == 0f || dot < min)
+                    {
+                        min = dot;
+                        index = i;
+                    }
+                }
+            }
+            _movePointIndex = index;
+            target = GameManager.I.bossMovePoints[_movePointIndex];
+            _moveNum = 0;
+            CurrentState = StateMachine.Move;
+        }
+    }
+
+    void MoveToPos(Vector3 nextPos)
     {
         //head
         _direction = nextPos - _head.position;
@@ -278,17 +320,18 @@ public class EnemySnake : EnemyUnit
                 Bullet bullet = bulletObject.GetComponent<Bullet>();
                 bullet.owner = Data;
                 bullet.skillData = Data.Skill;
+                bullet.transform.rotation = _head.rotation;
                 var dir = (_player.transform.position - _head.position).normalized;
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 if (_bulletNum % 2 == 1)
                 {
                     bullet.moveDirection = Quaternion.AngleAxis(_offsetAngle * (i - _bulletNum / 2), Vector3.forward) * dir;
-                    bullet.transform.rotation = Quaternion.AngleAxis(angle - _offsetAngle * (i - _bulletNum / 2), Vector3.forward);
+                    bullet.transform.rotation = Quaternion.AngleAxis(angle + _offsetAngle * (i - _bulletNum / 2), Vector3.forward);
                 }
                 else
                 {
                     bullet.moveDirection = Quaternion.AngleAxis(_offsetAngle * (i - _bulletNum / 2) + _offsetAngle / 2, Vector3.forward) * dir;
-                    bullet.transform.rotation = Quaternion.AngleAxis(angle - _offsetAngle * (i - _bulletNum / 2) + _offsetAngle / 2, Vector3.forward);
+                    bullet.transform.rotation = Quaternion.AngleAxis(angle + _offsetAngle * (i - _bulletNum / 2) + _offsetAngle / 2, Vector3.forward);
                 }
                 bullet.speed = Data.NowAtkSpeed;
                 bullet.gameObject.SetActive(true);
@@ -317,4 +360,28 @@ public class EnemySnake : EnemyUnit
 
     }
 
+    void Dead() {
+        _stopTimer += Time.deltaTime;
+        if (_stopTimer > _hittedStopTime)
+        {
+            if (_bodyPartIndex < _bodyParts.Length)
+            {
+                var prefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_DEAD_VFX);
+                var vfxObject = ObjectPool.I.Create(prefab);
+                vfxObject.transform.position = _bodyParts[_bodyPartIndex].transform.position;
+                vfxObject.gameObject.SetActive(true);
+                _bodyParts[_bodyPartIndex].gameObject.SetActive(false);
+                _bodyPartIndex++;
+            }
+            else
+            {
+                GlobalMessenger.Launch(EventMsg.KilledTheEnemy);
+                target = null;
+                ObjectPool.I.Recycle(gameObject);
+                ObjectPool.I.Recycle(_hpBarObject);
+                GlobalMessenger.Launch(EventMsg.GameClear);
+            }
+            _stopTimer = 0;
+        }
+    }
 }

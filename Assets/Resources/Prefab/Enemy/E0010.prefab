@@ -459,7 +459,7 @@ Transform:
   m_GameObject: {fileID: 4351582843059862374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4351582842782742359}
@@ -1739,7 +1739,7 @@ MonoBehaviour:
   _bulletNum: 3
   _followPlayerTime: 5
   _offsetAngle: 15
-  _hittedStopTime: 0.1
+  _hittedStopTime: 0.2
   _hpPositionY: 0.6
   _targetDistance: 0.6
   _smoothSpeed: 0.1
@@ -1754,4 +1754,14 @@ MonoBehaviour:
   - {fileID: 4351582843980295800}
   - {fileID: 4351582843934425508}
   - {fileID: 4351582842809438959}
+  _snakeSpriteRenderers:
+  - {fileID: 4351582843059862376}
+  - {fileID: 4351582843444454066}
+  - {fileID: 4351582843312463022}
+  - {fileID: 4351582842311360360}
+  - {fileID: 4351582844016288939}
+  - {fileID: 4351582843103402827}
+  - {fileID: 4351582843980295804}
+  - {fileID: 4351582843934425512}
+  - {fileID: 4351582842809438931}
   _debug: 0

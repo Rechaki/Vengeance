@@ -11,6 +11,8 @@ public class EnemySlime : EnemyUnit
     [SerializeField]
     float _hittedStopTime = 0.5f;
     [SerializeField]
+    float _targetScale = 0.6f;
+    [SerializeField]
     float _hpPositionY = 0.6f;
     [SerializeField]
     bool _debug = false;
@@ -28,6 +30,7 @@ public class EnemySlime : EnemyUnit
         _atkCD = Data.Skill.cd;
         _radius = Data.NowViewRadius;
         _bulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_SLIME_BULLET);
+        transform.localScale = new Vector3(0, 0, 1);
         if (_debug)
         {
             var hpBarPefab = ResourceManager.I.Load<GameObject>(AssetPath.HP_BAR);
@@ -36,7 +39,7 @@ public class EnemySlime : EnemyUnit
             _hpBarObject.SetActive(true);
         }
 
-        CurrentState = StateMachine.Idle;
+        CurrentState = StateMachine.Create;
         Data.RefreshEvent += Refresh;
         OnStateChange += StateChanged;
         damageColliderEvents.OnTriggerEnterEvent += OnDamageTriggerEnter;
@@ -63,6 +66,9 @@ public class EnemySlime : EnemyUnit
         {
             switch (CurrentState)
             {
+                case StateMachine.Create:
+                    OnCreate();
+                    break;
                 case StateMachine.Idle:
                     DoWaitForTarget();
                     break;
@@ -118,6 +124,11 @@ public class EnemySlime : EnemyUnit
     }
 
     void OnDamageTriggerEnter(Collider2D collider) {
+        if (CurrentState == StateMachine.Create)
+        {
+            return;
+        }
+
         if (collider.tag == "Weapon")
         {
             OnHit(collider.GetComponent<Weapon>().damage);
@@ -127,6 +138,18 @@ public class EnemySlime : EnemyUnit
         {
             OnHit(collider.transform.GetComponent<Bullet>().owner, collider.transform.GetComponent<Bullet>().skillData);
             _hitted = true;
+        }
+    }
+
+    void OnCreate() {
+        if (transform.localScale.x < _targetScale)
+        {
+            transform.localScale += new Vector3(Time.deltaTime, Time.deltaTime, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(_targetScale, _targetScale, 1);
+            CurrentState = StateMachine.Idle;
         }
     }
 

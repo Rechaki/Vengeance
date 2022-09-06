@@ -15,6 +15,8 @@ public class EnemyArcher : EnemyUnit
     [SerializeField]
     float _hittedStopTime = 0.5f;
     [SerializeField]
+    float _targetScale = 0.5f;
+    [SerializeField]
     bool _debug = false;
 
     GameObject _hpBarObject;
@@ -73,6 +75,9 @@ public class EnemyArcher : EnemyUnit
         {
             switch (CurrentState)
             {
+                case StateMachine.Create:
+                    OnCreate();
+                    break;
                 case StateMachine.Idle:
                     DoWaitForTarget();
                     break;
@@ -128,6 +133,11 @@ public class EnemyArcher : EnemyUnit
     }
 
     void OnDamageTriggerEnter(Collider2D collider) {
+        if (CurrentState == StateMachine.Create)
+        {
+            return;
+        }
+
         if (collider.tag == "Weapon")
         {
             OnHit(collider.GetComponent<Weapon>().damage);
@@ -140,10 +150,15 @@ public class EnemyArcher : EnemyUnit
         }
     }
 
-    void OnDamageCollisionEnter(Collision2D collision) {
-        if (collision.gameObject.tag == "Weapon")
+    void OnCreate() {
+        if (transform.localScale.x < _targetScale)
         {
-            OnHit(collision.gameObject.GetComponent<Weapon>().damage);
+            transform.localScale += new Vector3(Time.deltaTime, Time.deltaTime, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(_targetScale, _targetScale, 1);
+            CurrentState = StateMachine.Idle;
         }
     }
 

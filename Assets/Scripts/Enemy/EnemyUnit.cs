@@ -23,11 +23,6 @@ public class EnemyUnit : MonoBehaviour
 
     protected EnemyData Data => _enemyData;
 
-    //void OnDestroy() {
-    //    GlobalMessenger.RemoveListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
-    //    GlobalMessenger.RemoveListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
-    //}
-
     protected StateMachine CurrentState
     {
         get
@@ -41,15 +36,10 @@ public class EnemyUnit : MonoBehaviour
                 OnStateChange(value, _currentState);
             }
             _currentState = value;
+
             if (value == StateMachine.Dead)
             {
-                var prefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_DEAD_VFX);
-                var vfxObject = ObjectPool.I.Create(prefab);
-                vfxObject.transform.position = transform.position;
-                vfxObject.gameObject.SetActive(true);
-                GlobalMessenger.Launch(EventMsg.KilledTheEnemy);
-                //GlobalMessenger.RemoveListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
-                //GlobalMessenger.RemoveListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
+                OnDead();
             }
         }
     }
@@ -69,11 +59,18 @@ public class EnemyUnit : MonoBehaviour
 
     public virtual void InitData() {
         _enemyData = DataManager.I.GetEnemyData(id);
-        //GlobalMessenger.AddListener(EventMsg.GameClear, () => { ObjectPool.I.Recycle(gameObject); });
-        //GlobalMessenger.AddListener(EventMsg.GameOver, () => { ObjectPool.I.Recycle(gameObject); });
     }
 
-    public virtual void OnHit(int damage) {
+    protected virtual void OnDead() {
+
+        var prefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_DEAD_VFX);
+        var vfxObject = ObjectPool.I.Create(prefab);
+        vfxObject.transform.position = transform.position;
+        vfxObject.gameObject.SetActive(true);
+        GlobalMessenger.Launch(EventMsg.KilledTheEnemy);
+    }
+
+    protected virtual void OnHit(int damage) {
         _enemyData.OnHit(damage);
     }
 

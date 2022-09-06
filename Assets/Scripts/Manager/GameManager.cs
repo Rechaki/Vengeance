@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
@@ -93,7 +94,7 @@ public class GameManager : Singleton<GameManager>
 		SetMaxPosition();
 		GlobalMessenger.AddListener(EventMsg.GameStart, () => { _createState = CreateEnemyState.Slime; });
 		GlobalMessenger.AddListener(EventMsg.KilledTheEnemy, () => { _killedNum++; });
-		GlobalMessenger.AddListener(EventMsg.BossBattleStart, () => { CreateBoss(); });
+		GlobalMessenger.AddListener(EventMsg.BossBattleStart, CreateBoss);
 		isGameOver = false;
 		_createSlimeTimer = 0;
 		_createArcherTimer = 0;
@@ -169,7 +170,7 @@ public class GameManager : Singleton<GameManager>
 
 	private void GameOver() {
 		isGameOver = true;
-		//UIManager.I.Open(AssetPath.GAME_OVER_PANEL);
+        //UIManager.I.Open(AssetPath.GAME_OVER_PANEL);
 	}
 
 	private void Restart() {
