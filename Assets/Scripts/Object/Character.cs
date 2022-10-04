@@ -13,6 +13,8 @@ public class Character : MonoBehaviour
     [SerializeField]
     Animator _animator;
     [SerializeField]
+    AudioSource _audio;
+    [SerializeField]
     float _hpPositionY;
 
     StateMachine _currentState;
@@ -124,6 +126,7 @@ public class Character : MonoBehaviour
             {
                 _currentState = StateMachine.Attack;
                 _animator.SetTrigger("Attack");
+                _audio.Play();
 
                 if (_timer > _characterData.Skill.cd)
                 {

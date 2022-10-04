@@ -9,6 +9,7 @@ public class EnemyUnit : MonoBehaviour
     public Transform target;
     public ColliderEvents damageColliderEvents;
     public Animator animator;
+    public AudioSource audioSource;
 
     protected float _timeScale = 1.0f;
     protected List<BuffData> _buffs = new List<BuffData>();

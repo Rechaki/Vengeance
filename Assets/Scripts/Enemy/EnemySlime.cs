@@ -19,6 +19,8 @@ public class EnemySlime : EnemyUnit
 
     GameObject _hpBarObject;
     GameObject _bulletPrefab;
+    AudioClip _hittedSE;
+    AudioClip _deadSE;
     Vector3 _targetPos;
     bool _hitted;
     float _radius;
@@ -30,6 +32,8 @@ public class EnemySlime : EnemyUnit
         _atkCD = Data.Skill.cd;
         _radius = Data.NowViewRadius;
         _bulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.ENEMY_SLIME_BULLET);
+        _hittedSE = ResourceManager.I.Load<AudioClip>(AssetPath.HITTED_SE);
+        _deadSE = ResourceManager.I.Load<AudioClip>(AssetPath.DEAD_SE);
         transform.localScale = new Vector3(0, 0, 1);
         if (_debug)
         {
@@ -104,6 +108,8 @@ public class EnemySlime : EnemyUnit
         if (data.NowHP <= 0)
         {
             CurrentState = StateMachine.Dead;
+            audioSource.clip = _deadSE;
+            audioSource.Play();
             target = null;
             ObjectPool.I.Recycle(gameObject);
             ObjectPool.I.Recycle(_hpBarObject);
@@ -132,11 +138,15 @@ public class EnemySlime : EnemyUnit
         if (collider.tag == "Weapon")
         {
             OnHit(collider.GetComponent<Weapon>().damage);
+            audioSource.clip = _hittedSE;
+            audioSource.Play();
             _hitted = true;
         }
         else if (collider.tag == "Bullet")
         {
             OnHit(collider.transform.GetComponent<Bullet>().owner, collider.transform.GetComponent<Bullet>().skillData);
+            audioSource.clip = _hittedSE;
+            audioSource.Play();
             _hitted = true;
         }
     }

@@ -22,4 +22,8 @@
     public const string ENEMY_DATA = "CSV/EnemyData";
     public const string SKILL_DATA = "CSV/SkillData";
     public const string BUFF_DATA = "CSV/BuffData";
+
+    public const string CHARACTER_ATK_SE = "Audio/Attack_";
+    public const string DEAD_SE = "Audio/Dead";
+    public const string HITTED_SE = "Audio/Hitted";
 }
