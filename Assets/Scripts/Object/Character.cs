@@ -23,6 +23,9 @@ public class Character : MonoBehaviour
     AnimatorStateInfo _currentAnimation;
     GameObject _hpBarObject;
     GameObject _bulletPrefab;
+    AudioClip _attackSE;
+    AudioClip _hittedSE;
+    AudioClip _deadSE;
     protected float _timeScale = 1.0f;
     protected List<BuffData> _buffs = new List<BuffData>();
     protected Queue<BuffData> _buffsWaitingToAdd = new Queue<BuffData>();
@@ -44,6 +47,9 @@ public class Character : MonoBehaviour
             _characterData.RefreshEvent += Refresh;
 
             _bulletPrefab = ResourceManager.I.Load<GameObject>(AssetPath.CHARACTER_BULLET);
+            _attackSE = ResourceManager.I.Load<AudioClip>(AssetPath.CHARACTER_ATK_SE + id);
+            _hittedSE = ResourceManager.I.Load<AudioClip>(AssetPath.HITTED_SE);
+            _deadSE = ResourceManager.I.Load<AudioClip>(AssetPath.DEAD_SE);
 
             _movement = GetComponent<Movement>();
             _movement.moveSpeed = _characterData.NowMoveSpeed;
@@ -126,6 +132,7 @@ public class Character : MonoBehaviour
             {
                 _currentState = StateMachine.Attack;
                 _animator.SetTrigger("Attack");
+                _audio.clip = _attackSE;
                 _audio.Play();
 
                 if (_timer > _characterData.Skill.cd)
@@ -163,10 +170,14 @@ public class Character : MonoBehaviour
         if (collider.tag == "EnemyWeapon")
         {
             _characterData.OnHit(collider.transform.GetComponent<Weapon>().damage);
+            _audio.clip = _hittedSE;
+            _audio.Play();
         }
         if (collider.tag == "EnemyBullet")
         {
             OnHit(collider.transform.GetComponent<Bullet>().owner, collider.transform.GetComponent<Bullet>().skillData);
+            _audio.clip = _hittedSE;
+            _audio.Play();
         }
     }
 

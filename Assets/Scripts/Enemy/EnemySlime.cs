@@ -108,8 +108,8 @@ public class EnemySlime : EnemyUnit
         if (data.NowHP <= 0)
         {
             CurrentState = StateMachine.Dead;
-            audioSource.clip = _deadSE;
-            audioSource.Play();
+            //audioSource.clip = _deadSE;
+            //audioSource.Play();
             target = null;
             ObjectPool.I.Recycle(gameObject);
             ObjectPool.I.Recycle(_hpBarObject);
