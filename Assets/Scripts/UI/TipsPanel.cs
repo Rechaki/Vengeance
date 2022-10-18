@@ -12,6 +12,8 @@ public class TipsPanel : UIPanel
     [SerializeField]
     GameObject _keyBoardTips;
     [SerializeField]
+    GameObject _msgTips;
+    [SerializeField]
     GameObject _gameOver;
     [SerializeField]
     GameObject _gameClear;
@@ -28,7 +30,7 @@ public class TipsPanel : UIPanel
 
         InputManager.I.RightBtnEEvent += OnNext;
 
-        GlobalMessenger.AddListener(EventMsg.GameStart, HideTips);
+        GlobalMessenger.AddListener(EventMsg.GameStart, SetTips);
         GlobalMessenger.AddListener(EventMsg.BossComing, PlayBossIn);
         GlobalMessenger.AddListener(EventMsg.GameClear, ShowGameClear);
         GlobalMessenger.AddListener(EventMsg.GameOver, ShowGameOver);
@@ -36,13 +38,14 @@ public class TipsPanel : UIPanel
 
     protected override void Hide()
     {
-        HideTips();
+        _gamePadTips.SetActive(false);
+        _keyBoardTips.SetActive(false);
         _gameOverBtn.onClick.RemoveListener(OnOverClick);
         _gameClearBtn.onClick.RemoveListener(OnClearClick);
 
         InputManager.I.RightBtnEEvent -= OnNext;
 
-        GlobalMessenger.RemoveListener(EventMsg.GameStart, HideTips);
+        GlobalMessenger.RemoveListener(EventMsg.GameStart, SetTips);
         GlobalMessenger.RemoveListener(EventMsg.BossComing, PlayBossIn);
         GlobalMessenger.RemoveListener(EventMsg.GameClear, ShowGameClear);
         GlobalMessenger.RemoveListener(EventMsg.GameOver, ShowGameOver);
@@ -59,9 +62,10 @@ public class TipsPanel : UIPanel
         _keyBoardTips.SetActive(InputManager.I.DevicesType == InputManager.Devices.Keyboard);
     }
 
-    void HideTips() {
+    void SetTips() {
         _gamePadTips.SetActive(false);
         _keyBoardTips.SetActive(false);
+        _msgTips.SetActive(true);
     }
 
     void OnNext(float num, InputManager.ActionState state) {
